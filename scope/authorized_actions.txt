@@ -1,0 +1,25 @@
+# Authorized intrusive actions — Windows Hunt — NO ENGAGEMENT OPEN
+#
+# Everything not listed here is REFUSED. Passive static analysis of an in-scope target
+# (unpack, parse, disassemble, decompile, read strings) needs no entry and is always allowed
+# once scope_gate.sh target passes.
+#
+# Recognised verbs (add only the ones the ROE actually grants):
+#   install-on-vm        run the installer inside YOUR OWN disposable Windows VM
+#   run-binary           execute the target in that VM
+#   dynamic-trace        Procmon / ETW / Frida / API monitor against your own VM
+#   debug-attach         WinDbg / x64dbg attach, TTD recording
+#   fuzz-local           fuzz a parser in your own VM/container
+#   modify-acl           change ACLs in your own VM to test a hypothesis
+#   network-probe        live request to a host in authorized_hosts.txt
+#   mitm-update          intercept the app's own update channel in your own VM
+#   registry-write       write registry keys in your own VM
+#   exploit-poc          run a working LPE/RCE PoC in your own VM
+#
+# Verify:  scripts/scope_gate.sh action <verb>
+
+# --- ALLOWED ---
+
+# --- FORBIDDEN (deny wins) ---
+!attack-production
+!test-on-third-party-machine

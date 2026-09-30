@@ -1,0 +1,6 @@
+# Toolchain-validation fixtures ONLY. These are public installers used to test that Windows
+# Hunt's own parsers work — not engagement targets. The production gate
+# (scope/authorized_targets.txt) stays empty until a real engagement is authorized.
+7z2408-x64.msi
+7z2408.exe
+newtonsoft.json.nupkg

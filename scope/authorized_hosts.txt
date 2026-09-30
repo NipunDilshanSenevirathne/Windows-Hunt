@@ -1,0 +1,14 @@
+# Authorized LIVE hosts — Windows Hunt — NO ENGAGEMENT OPEN
+#
+# Gates every OUTBOUND request made ON BEHALF OF THE ENGAGEMENT (update-channel probing,
+# licence/telemetry endpoints, API testing). Static analysis of the binary needs NO entry.
+# Downloading TOOLING from pypi/github is provisioning, not engagement traffic, and is
+# governed by scripts/provision.sh, not this file.
+#
+# FAILS CLOSED. Suffix match: "example.com" allows *.example.com. '!' denies, and wins.
+#
+# Verify:  scripts/scope_gate.sh host <host|url>
+
+# --- IN SCOPE ---
+
+# --- OUT OF SCOPE (deny wins) ---

