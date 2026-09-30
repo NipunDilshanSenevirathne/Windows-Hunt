@@ -1,6 +1,6 @@
 # Windows Hunt
 
-**A deep security auditing and exploitation-research toolkit for Windows applications, built as a Claude Code skill.**
+**A deep security auditing and exploitation-research toolkit for Windows applications.**
 
 Point it at an installer, an executable, a DLL, an MSI/MSIX, an Electron app, a kernel driver or an installed application directory. It provisions its own toolchain, takes the target apart recursively, reconstructs every privilege boundary the product creates, hunts the classes that actually pay on Windows, composes them into chains, maps each primitive to the technique that converts it into a demonstrated escalation, scores everything against Microsoft's own boundary rules, and generates runnable proofs plus a read-only verification runbook for your own Windows VM.
 
